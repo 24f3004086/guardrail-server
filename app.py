@@ -116,6 +116,9 @@ def fetch_url(url):
 # -------------------------
 # MAIN GUARDRAIL
 # -------------------------
+@app.post("/")
+def root(req: Request):
+    return guardrail(req)
 
 @app.post("/check")
 def guardrail(req:Request):
