@@ -52,47 +52,23 @@ def read_file(path):
 # URL SECURITY
 # -------------------------
 
-def safe_url(url):
+def safe_file(path):
+
+    sandbox_real = os.path.realpath(
+        "/srv/agent-redteam/sandbox-450e215936"
+    )
+
+    requested_real = os.path.realpath(path)
 
     try:
-        parsed = urlparse(url)
+        common = os.path.commonpath(
+            [sandbox_real, requested_real]
+        )
 
-        host = parsed.hostname
+        return common == sandbox_real
 
-        if not host:
-            return False
-
-
-        # Only allow exact hosts
-        if host not in ALLOWED_HOSTS:
-            return False
-
-
-        # Resolve DNS
-
-        ips = socket.gethostbyname_ex(host)[2]
-
-
-        for ip in ips:
-
-            addr = ipaddress.ip_address(ip)
-
-
-            if (
-                addr.is_private
-                or addr.is_loopback
-                or addr.is_link_local
-            ):
-                return False
-
-
-        return True
-
-
-    except Exception:
+    except ValueError:
         return False
-
-
 
 def fetch_url(url):
 
