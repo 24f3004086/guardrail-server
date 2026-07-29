@@ -30,30 +30,6 @@ class Request(BaseModel):
 
 def safe_file(path):
 
-    real_path = os.path.realpath(path)
-
-    sandbox_real = os.path.realpath(SANDBOX)
-
-    if not real_path.startswith(sandbox_real + os.sep):
-        return False
-
-    return True
-
-
-
-def read_file(path):
-
-    with open(path,"r") as f:
-        return f.read()
-
-
-
-# -------------------------
-# URL SECURITY
-# -------------------------
-
-def safe_file(path):
-
     sandbox_real = os.path.realpath(
         "/srv/agent-redteam/sandbox-450e215936"
     )
@@ -69,6 +45,61 @@ def safe_file(path):
 
     except ValueError:
         return False
+
+
+
+def read_file(path):
+
+    with open(path,"r") as f:
+        return f.read()
+
+
+
+# -------------------------
+# URL SECURITY
+# -------------------------
+
+def safe_url(url):
+
+    try:
+        parsed = urlparse(url)
+
+        host = parsed.hostname
+
+        if not host:
+            return False
+
+
+        # Only allow exact hosts
+        if host not in ALLOWED_HOSTS:
+            return False
+
+
+        # Resolve DNS
+
+        ips = socket.gethostbyname_ex(host)[2]
+
+
+        for ip in ips:
+
+            addr = ipaddress.ip_address(ip)
+
+
+            if (
+                addr.is_private
+                or addr.is_loopback
+                or addr.is_link_local
+            ):
+                return False
+
+
+        return True
+
+
+    except Exception:
+        return False
+
+
 
 def fetch_url(url):
 
